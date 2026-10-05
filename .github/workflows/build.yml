@@ -21,7 +21,7 @@ jobs:
       - name: Generate keystore
         run: |
           keytool -genkeypair -v \
-            -keystore keystore.jks \
+            -keystore app/keystore.jks \
             -alias yallapips \
             -keyalg RSA -keysize 2048 \
             -validity 10000 \
@@ -34,7 +34,7 @@ jobs:
 
       - name: Build release APK
         env:
-          KEYSTORE_PATH: keystore.jks
+          KEYSTORE_PATH: app/keystore.jks
           KEYSTORE_PASS: yallapips
           KEY_ALIAS: yallapips
           KEY_PASS: yallapips
