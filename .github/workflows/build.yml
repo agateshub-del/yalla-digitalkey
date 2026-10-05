@@ -1,0 +1,48 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Generate keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore keystore.jks \
+            -alias yallapips \
+            -keyalg RSA -keysize 2048 \
+            -validity 10000 \
+            -storepass yallapips \
+            -keypass yallapips \
+            -dname "CN=YallaPips, OU=Trading, O=YallaPips, L=Dubai, S=Dubai, C=AE"
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build release APK
+        env:
+          KEYSTORE_PATH: keystore.jks
+          KEYSTORE_PASS: yallapips
+          KEY_ALIAS: yallapips
+          KEY_PASS: yallapips
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: yallapips-keyboard
+          path: app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
